@@ -30,10 +30,11 @@ def write_stats_to_file(stats_file, start_time, outage_count, avg_outage_duratio
         f.write(f"Last updated: {last_updated}\n")
 
 
-def write_to_csv(incidents_only_csv, outage_duration):
-    with open(incidents_only_csv, "a", newline="") as csv_file:
+def write_to_csv(outage_duration):
+    with open("incident_log.csv", "a", newline="") as csv_file:
         csv_writer = csv.writer(csv_file)
-        csv_writer.writerow([datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"{outage_duration:.2f}"])
+        current_time = datetime.now()
+        csv_writer.writerow([current_time.strftime("%Y-%m-%d"), current_time.strftime("%H:%M:%S"), f"{outage_duration:.2f}"])
 
 
 def main():
@@ -43,7 +44,6 @@ def main():
     # Incident Variables
     outage_start_time = None
     raw_log_file = f"raw_log_{current_date.strftime('%Y-%m-%d')}.txt"
-    incidents_only_csv = f"incidents_log_{current_date.strftime('%Y-%m-%d')}.csv"
 
     # Stat Variables
     outage_count = 0
@@ -63,7 +63,7 @@ def main():
                 outage_start_time = None
                 outage_count += 1  # Increment the outage counter
                 # Write incident to CSV for easier graphing
-                write_to_csv(incidents_only_csv, outage_duration)
+                write_to_csv(outage_duration)
 
                 # Stat Info Work
                 total_outage_duration += outage_duration
