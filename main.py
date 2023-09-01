@@ -34,7 +34,16 @@ def write_to_csv(outage_duration):
     with open("incident_log.csv", "a", newline="") as csv_file:
         csv_writer = csv.writer(csv_file)
         current_time = datetime.now()
-        csv_writer.writerow([current_time.strftime("%Y-%m-%d"), current_time.strftime("%H:%M:%S"), f"{outage_duration:.2f}"])
+        csv_writer.writerow(
+            [current_time.strftime("%Y-%m-%d"), current_time.strftime("%H:%M:%S"), f"{outage_duration:.2f}"])
+
+
+def write_to_connection_time_csv(connect_duration):
+    with open("connection_time_incident_log.csv", "a", newline="") as csv_file:
+        csv_writer = csv.writer(csv_file)
+        current_time = datetime.now()
+        csv_writer.writerow(
+            [current_time.strftime("%Y-%m-%d"), current_time.strftime("%H:%M:%S"), f"{connect_duration:.2f}"])
 
 
 def main():
@@ -50,9 +59,16 @@ def main():
     total_outage_duration = 0
     max_outage_duration = 0
 
-
     while True:
-        if check_internet_connection():
+        start = time.time()
+        result = check_internet_connection()
+        connect_time = time.time() - start
+
+        # 5 seconds might need to be tweaked
+        if connect_time > 5:
+            write_to_connection_time_csv(connect_time)
+
+        if result:
             if outage_start_time is not None:
                 # Incident Work
                 outage_duration = time.time() - outage_start_time
@@ -74,7 +90,6 @@ def main():
                 write_stats_to_file(stats_log_file, program_start_time, outage_count, avg_outage_duration,
                                     max_outage_duration, last_updated=datetime.now())
 
-
                 # Reset outage stats as it's a new day
                 if current_date != date.today():
                     outage_count = 0
@@ -82,7 +97,7 @@ def main():
                     max_outage_duration = 0
                     current_date = date.today()
             else:
-                log_message("Internet connection is available.", filename=raw_log_file)
+                log_message(f"Internet connection is available. Connect Time {connect_time:.2f}", filename=raw_log_file)
         else:
             if outage_start_time is None:
                 outage_start_time = time.time()
